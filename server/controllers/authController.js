@@ -18,7 +18,7 @@ export const registerUser = async (req, res) => {
         }
 
         const cleanEmail = email.trim().toLowerCase();
-        const existingUser = await User.findOne({email: cleanEmail});
+        const existingUser = await User.findOne({email: cleanEmail}).select("+password");
         if(existingUser){
             return res.status(400).json({
                 message: "User is aldready exists..."
