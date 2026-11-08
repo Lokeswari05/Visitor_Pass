@@ -104,3 +104,46 @@ export const loginUser = async (req, res) => {
 }
 
 // get cuurent user profile
+export const getProfile = async (req, res) => {
+    // user details aldready attached by authToken
+    try{
+        const user = await User.findById(req.user.id).select("_id name email phone role isActive");
+
+        if(!user){
+            return res.status(404).json({
+                message: "User not found"
+            });
+        }
+
+        if(!user.isActive){
+            return res.status(403).json({
+                message: "Account is not Active"
+            });
+        }
+        return res.status(200).json({
+            message: "User details fetched successfully.",
+            user
+        });
+    }
+    catch(error){
+        console.error("Error during fetching the user details");
+        return res.status(500).json({
+            message: "Error during fetching the user details", error
+        });
+    }
+}
+
+// if logout API contract wants create a simple logout endpoints
+export const logoutUser = async (req, res) => {
+    try{
+        return res.status(200).json({
+            message: `${req.user.name} logout Successfully`
+        });
+    }
+    catch(error){
+        console.error("Logout Error", error);
+        return res.status(500).json({
+            message: "Logout Error"
+        });
+    }
+}

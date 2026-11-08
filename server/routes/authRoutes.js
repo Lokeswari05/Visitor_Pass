@@ -1,5 +1,5 @@
 import { Router } from "express";
-import {registerUser, loginUser} from "../controllers/AuthController.js"
+import {registerUser, loginUser, getProfile, logoutUser} from "../controllers/AuthController.js"
 import { authorizedRoles, authToken } from "../middlewares/authMiddleware.js";
 
 const authRouter = Router();
@@ -34,5 +34,11 @@ authRouter.get("/protected/employee", authToken, authorizedRoles("employee"), (r
         user: req.user
     });
 });
+
+//get user profile
+authRouter.get("/get-me", authToken, getProfile);
+
+// if logout API contract wants create a simple logout endpoints
+authRouter.post("/logout", authToken, logoutUser);
 
 export default authRouter;
