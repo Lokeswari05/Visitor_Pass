@@ -51,7 +51,7 @@ const visitorSchema = new mongoose.Schema({
         enum: ["pending", "approved", "rejected", "checked_in", "checked_out", "cancelled"],
         default: "pending"
     }, 
-    remark: {
+    remarks: {
         type: String, 
         default: ""
     }
