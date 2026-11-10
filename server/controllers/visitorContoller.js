@@ -3,9 +3,10 @@ import Visitor from "../models/Visitor.js"
 
 export const RegisterVisitor = async(req, res) => {
     try{
-        const {visitorName, email, phone, employee, receptionist, visitDate, purpose, expectedArrival, status, remarks} = req.body;
+        const {visitorName, email, phone, employee, visitDate, purpose, expectedArrival, remarks} = req.body; //cannot receive status by fronntend it leads to approved by receptionist without get approval
+        // receptionist not needed, we use req.user.id from the jwt middleware to get the id 
 
-        if(!visitorName|| !phone || !purpose || !employee || !receptionist || !visitDate || !expectedArrival){ // email and remarks are optiional
+        if(!visitorName|| !phone || !purpose || !employee || !visitDate || !expectedArrival){ // email and remarks are optiional
             return res.status(400).json({
                 message: "All fields are required"
             });
@@ -14,7 +15,7 @@ export const RegisterVisitor = async(req, res) => {
         const employeeUser = await User.findOne({
             _id : employee,
             role: "employee",
-            isActive: true
+            // isActive: true
         })
         if(!employeeUser){
             return res.status(404).json({
@@ -55,6 +56,16 @@ export const RegisterVisitor = async(req, res) => {
                 message: "Visit date and arrival date must be same"
             });
         }
+        //Check  active visitor first - checked-in visitor cannot checkedin untill checkedout
+        const activeVisitor = await Visitor.findOne({
+            phone: phone.trim(),
+            status: "checked_in"
+        });
+        if(activeVisitor){
+            return res.status(409).json({
+                message: "Active visitor cannot be checked_in. Checed_out is required first "
+            })
+        }
 
         const pendingCount = await Visitor.countDocuments({
             employee,
@@ -80,27 +91,16 @@ export const RegisterVisitor = async(req, res) => {
                 message: "Duplicate Visitor are not valid"
             });
         }
-        //checked-in visitor cannot checkedin untill checkedout
-        const activeVisitor = await Visitor.findOne({
-            phone: phone.trim(),
-            status: "checked_in"
-        });
-        if(activeVisitor){
-            return res.status(409).json({
-                message: "Active visitor cannot be checked_in. Checed_out is required first "
-            })
-        }
 
         const visitor = await Visitor.create({
             visitorName: visitorName.trim(),
             email,
             phone: phone.trim(),
-            employee: employeeUser,
+            employee: employeeUser._id,
             receptionist: req.user.id,
             purpose: purpose.trim(),
             visitDate: visitDay,
             expectedArrival: arrival,
-            status,
             remarks: remarks,
         });
 
