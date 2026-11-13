@@ -16,9 +16,7 @@ const activitySchema = new mongoose.Schema({
         ref: "User", 
         required: true
     },
-    createdAt: {
-        type: Date
-    }, 
+    
     remarks: {
         type: String
     }
