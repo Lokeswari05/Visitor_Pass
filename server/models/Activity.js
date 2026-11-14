@@ -9,7 +9,7 @@ const activitySchema = new mongoose.Schema({
     action: {
         type: String,
         required: true,
-        enum: ["created", "approved", "rejected", "checked-_in", "checked_out", "cancelled"]
+        enum: ["created", "approved", "rejected", "checked_in", "checked_out", "cancelled"]
     },
     performedBy: {
         type: mongoose.Schema.Types.ObjectId,

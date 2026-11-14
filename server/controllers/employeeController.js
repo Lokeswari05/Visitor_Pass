@@ -1,3 +1,4 @@
+import Activity from "../models/Activity.js";
 import Visitor from "../models/Visitor.js"
 
 export const getAllVisitor = async(req, res) => {
@@ -73,16 +74,24 @@ export const approveOrReject = async(req, res) =>{
             });
         }
 
-        req.status = status;
+        // req.status = status;
         visitor.status = status;
-        req.remarks = remarks;
+        // req.remarks = remarks;
         visitor.remarks = remarks;
 
         await visitor.save();
-
+        // for maintaining activity record (for every action) create a new activity recored(separate doc) instead of update the existing one
+        const activity = await Activity.create({
+            visitor: visitor._id, //  after finding the visitor (id) from the db 
+            action: status,
+            performedBy: req.user.id,
+            remarks: remarks
+        });
+        
         return res.status(200).json({
-            message: "Visitor status update successfully",
-            visitor
+            message: "Visitor status update successfully by employee",
+            visitor, 
+            activity
         });
 
 
