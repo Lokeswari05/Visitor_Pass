@@ -4,7 +4,7 @@ import { authorizedRoles, authToken } from "../middlewares/authMiddleware.js";
 
 const employeeRouter = Router();
 
-employeeRouter.get("/getAllVisitor", authToken, authorizedRoles("employee"), getAllVisitor);
-employeeRouter.patch("/visitor/:id/updateStatus", authToken, authorizedRoles("employee"), approveOrReject);
+employeeRouter.get("/visitor", authToken, authorizedRoles("employee"), getAllVisitor);
+employeeRouter.patch("/visitor/:id/status", authToken, authorizedRoles("employee"), approveOrReject);
 
 export default employeeRouter

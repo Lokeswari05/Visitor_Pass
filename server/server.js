@@ -28,7 +28,7 @@ app.get("/",(req, res) => {
 }); 
 
 app.use("/api/auth/",authRouter);
-app.use("/api/visitor",visitorRouter);
+app.use("/api/Receptionist",visitorRouter);
 app.use("/api/employee", employeeRouter);
 app.use("/api/admin", adminRouter);
 
