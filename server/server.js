@@ -6,6 +6,7 @@ import dns from "node:dns";
 import authRouter from "./routes/authRoutes.js";
 import visitorRouter from "./routes/visitorRoutes.js";
 import employeeRouter from "./routes/employeeRoutes.js";
+import adminRouter from "./routes/adminRoutes.js";
 
 
 dotenv.config(); 
@@ -29,6 +30,7 @@ app.get("/",(req, res) => {
 app.use("/api/auth/",authRouter);
 app.use("/api/visitor",visitorRouter);
 app.use("/api/employee", employeeRouter);
+app.use("/api/admin", adminRouter);
 
 app.listen(PORT, () => {
     console.log(`Server is running on ${PORT}`);
