@@ -418,9 +418,15 @@ export const getAllVisitors = async(req, res) => {
 
         if(req.query.visitDate){
             const visitDate = req.query.visitDate.trim();
+            const date = new Date(visitDate);
+            if(Number.NaN(date().getTime())){
+                return res.status(400).json({
+                    message: "Invalid visitDate"
+                });
+            }
             const startDate = new Date(`${visitDate}T00:00:00`);
             const endDate = new Date(startDate);
-
+            
             endDate.setDate(endDate.getDate() + 1);
 
             filter.visitDate = {
@@ -489,24 +495,33 @@ export const getActivity = async(req, res) => {
         const filter = {};
         if(req.query.employee){
             const employeeId = req.query.employee;
+            if (!mongoose.Types.ObjectId.isValid(employeeId)) {
+                return res.status(400).json({
+                    message: "Invalid employee ID"
+                });
+            }
+            
             const employeeUser = await User.findById(employeeId);
             if(!employeeUser){
                 return res.status(404).json({
                     message: "User not found"
                 });
             }
+            if(employeeUser.role !== "employee"){
+                return res.status(400).json({
+                    message: "Invalid role"
+                })
+            }
             const employeeVisitor = await Visitor.find({
                 employee: employeeUser._id,
-            }).select("_id");
+            }).select("_id");// select visitor id's only
 
             const visitorId = employeeVisitor.map(
                 visitor => visitor._id
-            );
-
-
+            );//id receives as a array
             filter.visitor = {
                 $in: visitorId
-            };
+            }; //only given visitor activity be included
         
         }
         if(req.query.performedBy){
