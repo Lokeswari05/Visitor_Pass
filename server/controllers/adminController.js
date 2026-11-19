@@ -169,69 +169,6 @@ export const getUser = async(req, res) => {
     }
 }
 
-
-export const registerUser = async(req, res) => {
-    try{
-        const {name, email, phone, password, role} = req.body;
-        if(!name || !email || !phone || !password || !role){
-            return res.status(400).json({
-                message: "All fields are required."
-            });
-        }
-        const cleanName = name.trim();
-        const cleanEmail = email.trim().toLowerCase();
-        const existingUser = await User.findOne({email: cleanEmail});
-        if(existingUser){
-            return res.status(409).json({
-                message: "User aldready exists"
-            });
-        }
-        const cleanPhone = phone ? phone.toString().replace(/\D/g, "") : "";
-        if(cleanPhone.length !== 10){
-            return res.status(400).json({
-                message: "Phone must contain 10 digits."
-            });
-        }
-        
-        if(password.length < 6){
-            return res.status(400).json({
-                message: "Password must contain atleast 6 characters"
-            });
-        }
-        const hashedPassword = await bcrypt.hash(password, 10 );
-        const cleanRole = role.trim().toLowerCase();
-        const allowedRoles = ["admin", "receptionist", "employee"];
-        if(!allowedRoles.includes(cleanRole)){
-            return res.status(400).json({
-                message: "Invalid role"
-            });
-        }
-        const user = await User.create({
-            name: cleanName, email: cleanEmail, phone: cleanPhone, password: hashedPassword, role: cleanRole
-        });
-
-        return res.status(201).json({
-            message: "User register successfully",
-            user: {
-                _id: user._id,
-                name: user.name,
-                email: user.email,
-                phone: user.phone,
-                role: user.role,
-                isActive: true
-            }
-        });
-
-    }catch(error){
-        console.error("Error registering the user by admin");
-        return res.status(500).json({
-            message: "Error registering the user by admin",
-            error: error.message
-        })
-    }
-    // improvements: email(format) validation, duplicate email race condition
-}
-
 export const updateUser = async(req, res) => {
     try{
         const {id} = req.params;
@@ -418,12 +355,34 @@ export const getAllVisitors = async(req, res) => {
 
         if(req.query.visitDate){
             const visitDate = req.query.visitDate.trim();
-            const date = new Date(visitDate);
-            if(Number.NaN(date().getTime())){
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(visitDate)) {
+                return res.status(400).json({
+                    message: "Invalid visitDate format. Use YYYY-MM-DD"
+                });
+            }
+            //
+            const [year, month, day] = visitDate.split("-").map(Number);
+            //split string --> array(string datatype).map(number) --> array(number dt) --> finally return as array destructing
+           
+            const date = new Date(year, month - 1, day); //In js month starts with 0s, jan-0 (1-1)
+            //date object la invalid date --> normalize the date(automatically)
+
+            if(
+                date.getFullYear() !== year ||
+                date.getMonth() !== month - 1 ||
+                date.getDate() !== day
+            ){
                 return res.status(400).json({
                     message: "Invalid visitDate"
                 });
             }
+
+            // const date = new Date(visitDate);
+            // if(Number.NaN(date.getTime())){
+            //     return res.status(400).json({
+            //         message: "Invalid visitDate"
+            //     });
+            // }
             const startDate = new Date(`${visitDate}T00:00:00`);
             const endDate = new Date(startDate);
             
@@ -500,7 +459,7 @@ export const getActivity = async(req, res) => {
                     message: "Invalid employee ID"
                 });
             }
-            
+
             const employeeUser = await User.findById(employeeId);
             if(!employeeUser){
                 return res.status(404).json({

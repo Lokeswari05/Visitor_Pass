@@ -1,7 +1,7 @@
 import {Router} from "express"
 import { authorizedRoles, authToken } from "../middlewares/authMiddleware.js";
-import { getActivity, getAllUsers, getAllVisitors, getDashboard, getUser, getVisitor, updateUser, updateUserStatus } from "../controllers/adminController.js";
-import { registerUser } from "../controllers/AuthController.js";
+import { getActivity, getAllUsers, getAllVisitors, getDashboard, getUser, getVisitor, registerUser, updateUser, updateUserStatus } from "../controllers/adminController.js";
+
 
 const adminRouter = Router();
 

@@ -1,6 +1,7 @@
 import Activity from "../models/Activity.js";
 import User from "../models/User.js";
 import Visitor from "../models/Visitor.js";
+import mongoose from "mongoose";
 
 export const RegisterVisitor = async(req, res) => {
     try{
@@ -130,6 +131,11 @@ export const checkIn = async (req, res) => {
     try{
         
         const {id} = req.params;
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({
+                message: "Invalid visitor ID"
+            });
+        }
         
         const visitor = await Visitor.findById(id);
         if(!visitor){
@@ -177,7 +183,11 @@ export const checkOut = async (req, res) => {
     try{
         
         const {id} = req.params;
-        
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({
+                message: "Invalid visitor ID"
+            });
+        }
         const visitor = await Visitor.findById(id);
         if(!visitor){
             return res.status(404).json({
@@ -207,7 +217,7 @@ export const checkOut = async (req, res) => {
         });
 
         return res.status(200).json({
-            message: "visitor status update (checkIn) successfully",
+            message: "visitor status update (checkOut) successfully",
             visitor,
             activity
         });
@@ -223,6 +233,11 @@ export const checkOut = async (req, res) => {
 export const getVisitorActivity = async (req, res) => {
     try{
         const {id} = req.params;
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({
+                message: "Invalid visitor ID"
+            });
+        }
 
         const visitor = await Visitor.findById(id);
         if(!visitor){
@@ -230,7 +245,7 @@ export const getVisitorActivity = async (req, res) => {
                 message : "visitor not found"
             });
         }
-        if(req.user.role !== "employee" && visitor.employee.toString() !== req.user.id){
+        if(req.user.role === "employee" && visitor.employee.toString() !== req.user.id){
             return res.status(403).json({
                 message: "Access Denied. You are not an authorized employee to view visitor activity."
             })

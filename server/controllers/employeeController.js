@@ -49,6 +49,12 @@ export const getAllVisitor = async(req, res) => {
 export const approveOrReject = async(req, res) =>{
     try{
         const {id} = req.params;
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({
+                message: "Invalid visitor ID"
+            });
+        }
+
         const {status, remarks} = req.body;
         
         if(!["approved","rejected"].includes(status)){
@@ -63,8 +69,9 @@ export const approveOrReject = async(req, res) =>{
                 message: "Visitor not found."
             });
         }
+        //employee owership
         if(visitor.employee.toString() !== req.user.id){
-            return res.status(401).json({
+            return res.status(403).json({
                 message: "Invalid Employee"
             });
         }
